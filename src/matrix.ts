@@ -1,0 +1,30 @@
+import { Matrix4 as Matrix4Type } from "./types";
+export class Matrix4 {
+  public readonly elements: Float32Array;
+
+  constructor(init: Matrix4Type) {
+    this.elements = new Float32Array(init);
+  }
+
+  static create() {
+    return new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+  }
+
+  public multiply(m: Matrix4) {
+    const a = this.elements;
+    const b = m.elements;
+    const result = new Array<number>(16);
+
+    for (let i = 0; i < 4; i++) {
+      for (let j = 0; j < 4; j++) {
+        result[i * 4 + j] =
+          a[i * 4] * b[j] +
+          a[i * 4 + 1] * b[j + 4] +
+          a[i * 4 + 2] * b[j + 8] +
+          a[i * 4 + 3] * b[j + 12];
+      }
+    }
+
+    return new Matrix4(result as Matrix4Type);
+  }
+}
