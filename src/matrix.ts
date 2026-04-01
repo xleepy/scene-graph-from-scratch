@@ -27,4 +27,12 @@ export class Matrix4 {
 
     return new Matrix4(result as Matrix4Type);
   }
+
+  public makeTranslation(x: number, y: number, z: number): Matrix4 {
+    return new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]);
+  }
+
+  public toString(): string {
+    return JSON.stringify(Array.from(this.elements));
+  }
 }

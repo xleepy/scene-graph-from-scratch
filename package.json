@@ -3,12 +3,15 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "tsx src/index.ts",
+    "test": "node --require tsx/cjs --test src/matrix.test.ts src/transform.test.ts src/node.test.ts"
   },
   "author": "",
   "license": "ISC",
   "description": "",
   "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
     "typescript": "^5.8.3"
   }
 }

@@ -1,7 +1,7 @@
 # Scene Graph Learning Plan
 
 This plan follows the code already in this repo and builds on it step by step.
-Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
+Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph>
 
 ---
 
@@ -11,11 +11,11 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
 
 **Todos**
 
-- [ ] Read the LearnOpenGL scene graph article (linked in README)
-- [ ] Draw a scene graph tree on paper: root → car body → 4 wheel nodes
-- [ ] Open [src/node.ts](src/node.ts) and trace how `add()` links parent ↔ child
-- [ ] Explain to yourself in one sentence what "local space" vs "world space" means
-- [ ] Write down the rule: *world transform = parent world matrix × node local matrix*
+- [x] Read the LearnOpenGL scene graph article (linked in README)
+- [x] Draw a scene graph tree on paper: root → car body → 4 wheel nodes
+- [x] Open [src/node.ts](src/node.ts) and trace how `add()` links parent ↔ child
+- [x] Explain to yourself in one sentence what "local space" vs "world space" means
+- [x] Write down the rule: _world transform = parent world matrix × node local matrix_
 
 **Concepts**
 
@@ -30,8 +30,8 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
    - Example: a car body node has wheel nodes as children — rotating the car rotates all wheels automatically.
 
 3. **Local vs. world space**
-   - *Local space*: transform relative to the parent.
-   - *World space*: transform relative to the root (the final position on screen).
+   - _Local space_: transform relative to the parent.
+   - _World space_: transform relative to the root (the final position on screen).
    - World transform = parent's world matrix × node's local matrix.
 
 ---
@@ -42,12 +42,12 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
 
 **Todos**
 
-- [ ] Open [src/types.ts](src/types.ts) — write out a `Vector3` and `Matrix4` by hand
-- [ ] Verify `Matrix4.create()` in [src/matrix.ts](src/matrix.ts) produces the identity matrix (1s on diagonal, 0s elsewhere)
-- [ ] Read `Matrix4.multiply()` at [src/matrix.ts:13](src/matrix.ts#L13) and trace one multiplication step manually
-- [ ] Look up the difference between column-major and row-major matrix storage and decide which convention this repo uses
-- [ ] Write down TRS order: Translation × Rotation × Scale — and why order matters
-- [ ] Open [src/transform.ts](src/transform.ts) — confirm it holds all three TRS fields plus `modelMatrix`
+- [x] Open [src/types.ts](src/types.ts) — write out a `Vector3` and `Matrix4` by hand
+- [x] Verify `Matrix4.create()` in [src/matrix.ts](src/matrix.ts) produces the identity matrix (1s on diagonal, 0s elsewhere)
+- [x] Read `Matrix4.multiply()` at [src/matrix.ts:13](src/matrix.ts#L13) and trace one multiplication step manually
+- [x] Look up the difference between column-major and row-major matrix storage and decide which convention this repo uses
+- [x] Write down TRS order: Translation × Rotation × Scale — and why order matters
+- [x] Open [src/transform.ts](src/transform.ts) — confirm it holds all three TRS fields plus `modelMatrix`
 
 **Concepts**
 
@@ -101,9 +101,11 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
 3. **Propagate world matrices down the tree**
    - Add `worldMatrix: Matrix4` to each `Node`.
    - On update, walk the tree top-down:
+
      ```
      node.worldMatrix = parent.worldMatrix × node.localMatrix
      ```
+
    - Root node's world matrix is its local matrix (no parent).
 
 ---
@@ -182,13 +184,13 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
 
 **Concepts**
 
-| Feature | Description |
-|---|---|
-| Camera node | A node whose inverse world matrix becomes the view matrix |
-| Visibility flag | `node.visible = false` skips the node and its subtree during render |
+| Feature          | Description                                                                                         |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| Camera node      | A node whose inverse world matrix becomes the view matrix                                           |
+| Visibility flag  | `node.visible = false` skips the node and its subtree during render                                 |
 | Component system | Attach a `MeshComponent`, `LightComponent`, etc. to nodes instead of baking rendering into the node |
-| Bounding volumes | Axis-aligned bounding boxes (AABB) that update with world transform — used for frustum culling |
-| Instancing | Reuse the same mesh data across many nodes with different world matrices |
+| Bounding volumes | Axis-aligned bounding boxes (AABB) that update with world transform — used for frustum culling      |
+| Instancing       | Reuse the same mesh data across many nodes with different world matrices                            |
 
 ---
 
@@ -202,10 +204,12 @@ Reference article: https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Graph
 
 ## Quick Reference: Files in This Repo
 
-| File | What it does now | What it needs |
-|---|---|---|
-| [src/types.ts](src/types.ts) | `Vector3`, `Matrix4` types | Done |
-| [src/matrix.ts](src/matrix.ts) | Identity matrix + multiply | Translation, rotation, scale factory methods |
-| [src/transform.ts](src/transform.ts) | Holds TRS + `modelMatrix` | `updateMatrix()` that builds matrix from TRS |
-| [src/node.ts](src/node.ts) | Parent-child tree + local TRS | `worldMatrix`, `updateWorldMatrix()`, dirty flag |
-| [src/index.ts](src/index.ts) | Creates root + child1 | Traversal demo, logging world positions |
+| File                                 | What it does now              | What it needs                                             |
+| ------------------------------------ | ----------------------------- | --------------------------------------------------------- |
+| [src/types.ts](src/types.ts)         | `Vector3`, `Matrix4` types    | Done                                                      |
+| [src/matrix.ts](src/matrix.ts)       | Identity matrix + multiply    | Translation, rotation, scale factory methods              |
+| [src/transform.ts](src/transform.ts) | Holds TRS + `modelMatrix`     | `updateMatrix()` that builds matrix from TRS              |
+| [src/node.ts](src/node.ts)           | Parent-child tree + local TRS | `worldMatrix`, `updateWorldMatrix()`, dirty flag          |
+| [src/index.ts](src/index.ts)         | Creates root + child1         | Traversal demo, logging world positions s matrix from TRS |
+| [src/node.ts](src/node.ts)           | Parent-child tree + local TRS | `worldMatrix`, `updateWorldMatrix()`, dirty flag          |
+| [src/index.ts](src/index.ts)         | Creates root + child1         | Traversal demo, logging world positions                   |

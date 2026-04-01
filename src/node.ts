@@ -17,4 +17,18 @@ export class Node {
   setParent(parent: Node): void {
     this.parent = parent;
   }
+
+  toString(): string {
+    return JSON.stringify(
+      {
+        name: this.name,
+        position: this.position,
+        rotation: this.rotation,
+        scale: this.scale,
+        children: this.children.map((child) => child.toString()),
+      },
+      null,
+      2,
+    );
+  }
 }
