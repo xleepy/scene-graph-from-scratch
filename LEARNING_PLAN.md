@@ -79,13 +79,13 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Add a `makeTranslation(x, y, z): Matrix4` static method to `Matrix4` — _translation can't be expressed in a 3×3 matrix; this is why we use 4×4 with a homogeneous coordinate_
-- [ ] Add a `makeScale(sx, sy, sz): Matrix4` static method to `Matrix4` — _scale sits on the diagonal; understanding this makes the TRS layout readable_
-- [ ] Add `rotationX(angle)`, `rotationY(angle)`, `rotationZ(angle)` static methods to `Matrix4` — _each axis rotation is just the 2D cos/sin pattern applied to the two axes that move; the third axis row/column is unchanged_
-- [ ] Add `updateMatrix()` to `Transform` that computes `modelMatrix = T × R × S` — _this collapses three separate matrices into one, so downstream code only has to deal with a single matrix per node_
-- [ ] Test `updateMatrix()` manually: set position `[1,0,0]`, call it, verify column 3 of the matrix is `[1,0,0,1]` — _a concrete check that your matrix layout and multiply order are correct before wiring it into the tree_
-- [ ] Add `worldMatrix: Matrix4` field to `Node` — _separating local vs world matrix is what lets you move a parent and have all children move "for free"_
-- [ ] In `Node`, compute `worldMatrix = parent.worldMatrix × localMatrix`; when no parent exists use `localMatrix` directly — _this is the one rule that makes the whole hierarchy work_
+- [x] Add a `makeTranslation(x, y, z): Matrix4` static method to `Matrix4` — _translation can't be expressed in a 3×3 matrix; this is why we use 4×4 with a homogeneous coordinate_
+- [x] Add a `makeScale(sx, sy, sz): Matrix4` static method to `Matrix4` — _scale sits on the diagonal; understanding this makes the TRS layout readable_
+- [x] Add `rotationX(angle)`, `rotationY(angle)`, `rotationZ(angle)` static methods to `Matrix4` — _each axis rotation is just the 2D cos/sin pattern applied to the two axes that move; the third axis row/column is unchanged_
+- [x] Add `updateMatrix()` to `Transform` that computes `modelMatrix = T × R × S` — _this collapses three separate matrices into one, so downstream code only has to deal with a single matrix per node_
+- [x] Test `updateMatrix()` manually: set position `[1,0,0]`, call it, verify column 3 of the matrix is `[1,0,0,1]` — _a concrete check that your matrix layout and multiply order are correct before wiring it into the tree_
+- [x] Add `worldMatrix: Matrix4` field to `Node` — _separating local vs world matrix is what lets you move a parent and have all children move "for free"_
+- [x] In `Node`, compute `worldMatrix = parent.worldMatrix × localMatrix`; when no parent exists use `localMatrix` directly — _this is the one rule that makes the whole hierarchy work_
 
 **Concepts**
 
@@ -116,14 +116,14 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Add a `dirty: boolean = true` flag to `Node` — _without this, every node recomputes its world matrix every frame even if nothing changed_
-- [ ] Set `dirty = true` in `Node` whenever `position`, `rotation`, or `scale` is changed (use setters) — _setters intercept assignment so the flag is never missed; also cascade `dirty` down to children since their world matrix depends on yours_
-- [ ] Implement `Node.updateWorldMatrix(parentWorldMatrix?: Matrix4)`:
-  - [ ] If dirty: recompute local matrix, set `dirty = false` — _only do the expensive TRS multiply when something actually changed_
-  - [ ] Multiply parent world matrix × local matrix → store as `worldMatrix` — _the parent's matrix must already be up to date, which is guaranteed by the top-down traversal order_
-  - [ ] Recurse into each child passing `this.worldMatrix` — _each child receives its parent's (now-correct) world matrix so it can compute its own_
-- [ ] Call `root.updateWorldMatrix()` in [src/index.ts](src/index.ts) and log the world matrix of `child1` — _the single entry point that triggers the whole tree update; call it once per frame before rendering_
-- [ ] Manually move `child1` position, call update again, verify world matrix changed — _confirms the dirty flag is being set and cleared correctly_
+- [x] Add a `dirty: boolean = true` flag to `Node` — _without this, every node recomputes its world matrix every frame even if nothing changed_
+- [x] Set `dirty = true` in `Node` whenever `position`, `rotation`, or `scale` is changed (use setters) — _setters intercept assignment so the flag is never missed; also cascade `dirty` down to children since their world matrix depends on yours_
+- [x] Implement `Node.updateWorldMatrix(parentWorldMatrix?: Matrix4)`:
+  - [x] If dirty: recompute local matrix, set `dirty = false` — _only do the expensive TRS multiply when something actually changed_
+  - [x] Multiply parent world matrix × local matrix → store as `worldMatrix` — _the parent's matrix must already be up to date, which is guaranteed by the top-down traversal order_
+  - [x] Recurse into each child passing `this.worldMatrix` — _each child receives its parent's (now-correct) world matrix so it can compute its own_
+- [x] Call `root.updateWorldMatrix()` in [src/index.ts](src/index.ts) and log the world matrix of `child1` — _the single entry point that triggers the whole tree update; call it once per frame before rendering_
+- [x] Manually move `child1` position, call update again, verify world matrix changed — _confirms the dirty flag is being set and cleared correctly_
 
 **Concepts**
 

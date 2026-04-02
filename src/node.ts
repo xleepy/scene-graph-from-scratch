@@ -79,6 +79,10 @@ export class Node {
     this.makeDirty();
   }
 
+  public getChildren(): Node[] {
+    return this.children;
+  }
+
   // Called by add() — kept separate so the parent link is set without triggering
   // the children array logic that belongs to the parent's add().
   setParent(parent: Node): void {
