@@ -11,11 +11,11 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [x] Read the LearnOpenGL scene graph article (linked in README)
-- [x] Draw a scene graph tree on paper: root → car body → 4 wheel nodes
-- [x] Open [src/node.ts](src/node.ts) and trace how `add()` links parent ↔ child
-- [x] Explain to yourself in one sentence what "local space" vs "world space" means
-- [x] Write down the rule: _world transform = parent world matrix × node local matrix_
+- [x] Read the LearnOpenGL scene graph article (linked in README) — _establishes the mental model everything else builds on_
+- [x] Draw a scene graph tree on paper: root → car body → 4 wheel nodes — _makes the parent-child relationship concrete before touching code_
+- [x] Open [src/node.ts](src/node.ts) and trace how `add()` links parent ↔ child — _shows how the tree is actually wired in memory_
+- [x] Explain to yourself in one sentence what "local space" vs "world space" means — _this distinction is why the whole system exists; get it wrong and nothing renders in the right place_
+- [x] Write down the rule: _world transform = parent world matrix × node local matrix_ — _this single equation drives all of Phase 3 and 4_
 
 **Concepts**
 
@@ -42,12 +42,12 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [x] Open [src/types.ts](src/types.ts) — write out a `Vector3` and `Matrix4` by hand
-- [x] Verify `Matrix4.create()` in [src/matrix.ts](src/matrix.ts) produces the identity matrix (1s on diagonal, 0s elsewhere)
-- [x] Read `Matrix4.multiply()` at [src/matrix.ts:13](src/matrix.ts#L13) and trace one multiplication step manually
-- [x] Look up the difference between column-major and row-major matrix storage and decide which convention this repo uses
-- [x] Write down TRS order: Translation × Rotation × Scale — and why order matters
-- [x] Open [src/transform.ts](src/transform.ts) — confirm it holds all three TRS fields plus `modelMatrix`
+- [x] Open [src/types.ts](src/types.ts) — write out a `Vector3` and `Matrix4` by hand — _seeing the flat 16-number layout demystifies how matrix data is stored_
+- [x] Verify `Matrix4.create()` in [src/matrix.ts](src/matrix.ts) produces the identity matrix (1s on diagonal, 0s elsewhere) — _the identity is the "do nothing" transform; all other matrices are deviations from it_
+- [x] Read `Matrix4.multiply()` at [src/matrix.ts:13](src/matrix.ts#L13) and trace one multiplication step manually — _forces you to understand row vs column indexing, which you'll need when building TRS matrices_
+- [x] Look up the difference between column-major and row-major matrix storage and decide which convention this repo uses — _the same 16 numbers mean different transforms depending on convention; getting this wrong silently produces wrong results_
+- [x] Write down TRS order: Translation × Rotation × Scale — and why order matters — _matrix multiplication is not commutative; the wrong order produces shearing and other artifacts_
+- [x] Open [src/transform.ts](src/transform.ts) — confirm it holds all three TRS fields plus `modelMatrix` — _this is the struct you'll be filling in Phase 3_
 
 **Concepts**
 
@@ -79,13 +79,13 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Add a `makeTranslation(x, y, z): Matrix4` static method to `Matrix4`
-- [ ] Add a `makeScale(x, y, z): Matrix4` static method to `Matrix4`
-- [ ] Add `rotationX(angle)`, `rotationY(angle)`, `rotationZ(angle)` static methods to `Matrix4`
-- [ ] Add `updateMatrix()` to `Transform` that computes `modelMatrix = T × R × S`
-- [ ] Test `updateMatrix()` manually: set position `[1,0,0]`, call it, verify column 3 of the matrix is `[1,0,0,1]`
-- [ ] Add `worldMatrix: Matrix4` field to `Node`
-- [ ] In `Node`, compute `worldMatrix = parent.worldMatrix × localMatrix` when no parent exists use `localMatrix` directly
+- [ ] Add a `makeTranslation(x, y, z): Matrix4` static method to `Matrix4` — _translation can't be expressed in a 3×3 matrix; this is why we use 4×4 with a homogeneous coordinate_
+- [ ] Add a `makeScale(sx, sy, sz): Matrix4` static method to `Matrix4` — _scale sits on the diagonal; understanding this makes the TRS layout readable_
+- [ ] Add `rotationX(angle)`, `rotationY(angle)`, `rotationZ(angle)` static methods to `Matrix4` — _each axis rotation is just the 2D cos/sin pattern applied to the two axes that move; the third axis row/column is unchanged_
+- [ ] Add `updateMatrix()` to `Transform` that computes `modelMatrix = T × R × S` — _this collapses three separate matrices into one, so downstream code only has to deal with a single matrix per node_
+- [ ] Test `updateMatrix()` manually: set position `[1,0,0]`, call it, verify column 3 of the matrix is `[1,0,0,1]` — _a concrete check that your matrix layout and multiply order are correct before wiring it into the tree_
+- [ ] Add `worldMatrix: Matrix4` field to `Node` — _separating local vs world matrix is what lets you move a parent and have all children move "for free"_
+- [ ] In `Node`, compute `worldMatrix = parent.worldMatrix × localMatrix`; when no parent exists use `localMatrix` directly — _this is the one rule that makes the whole hierarchy work_
 
 **Concepts**
 
@@ -116,14 +116,14 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Add a `dirty: boolean = true` flag to `Node`
-- [ ] Set `dirty = true` in `Node` whenever `position`, `rotation`, or `scale` is changed (use setters)
+- [ ] Add a `dirty: boolean = true` flag to `Node` — _without this, every node recomputes its world matrix every frame even if nothing changed_
+- [ ] Set `dirty = true` in `Node` whenever `position`, `rotation`, or `scale` is changed (use setters) — _setters intercept assignment so the flag is never missed; also cascade `dirty` down to children since their world matrix depends on yours_
 - [ ] Implement `Node.updateWorldMatrix(parentWorldMatrix?: Matrix4)`:
-  - [ ] If dirty: recompute local matrix, set `dirty = false`
-  - [ ] Multiply parent world matrix × local matrix → store as `worldMatrix`
-  - [ ] Recurse into each child passing `this.worldMatrix`
-- [ ] Call `root.updateWorldMatrix()` in [src/index.ts](src/index.ts) and log the world matrix of `child1`
-- [ ] Manually move `child1` position, call update again, verify world matrix changed
+  - [ ] If dirty: recompute local matrix, set `dirty = false` — _only do the expensive TRS multiply when something actually changed_
+  - [ ] Multiply parent world matrix × local matrix → store as `worldMatrix` — _the parent's matrix must already be up to date, which is guaranteed by the top-down traversal order_
+  - [ ] Recurse into each child passing `this.worldMatrix` — _each child receives its parent's (now-correct) world matrix so it can compute its own_
+- [ ] Call `root.updateWorldMatrix()` in [src/index.ts](src/index.ts) and log the world matrix of `child1` — _the single entry point that triggers the whole tree update; call it once per frame before rendering_
+- [ ] Manually move `child1` position, call update again, verify world matrix changed — _confirms the dirty flag is being set and cleared correctly_
 
 **Concepts**
 
@@ -149,12 +149,12 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Create `src/renderer.ts` with a `render(root: Node, ctx: CanvasRenderingContext2D)` function
-- [ ] In the render function, traverse the tree depth-first
-- [ ] For each node, extract the world position (columns 12–14 of the world matrix) and draw a rectangle on the canvas
-- [ ] Wire it up in `index.ts`: create a `<canvas>`, call `root.updateWorldMatrix()`, then `render(root, ctx)`
-- [ ] Move `child1` to `[100, 50, 0]` and confirm it renders at a different position than the root
-- [ ] (Stretch) Set up a minimal WebGL context and pass `node.worldMatrix.elements` as `uniform mat4 uModel`
+- [ ] Create `src/renderer.ts` with a `render(root: Node, ctx: CanvasRenderingContext2D)` function — _separating rendering from the scene graph keeps the tree logic reusable and testable without a GPU_
+- [ ] In the render function, traverse the tree depth-first — _same traversal order as `updateWorldMatrix`; by this point all world matrices are already computed_
+- [ ] For each node, extract the world position (columns 12–14 of the world matrix) and draw a rectangle on the canvas — _proves the matrices are correct with a visual check you can eyeball_
+- [ ] Wire it up in `index.ts`: create a `<canvas>`, call `root.updateWorldMatrix()`, then `render(root, ctx)` — _update always before render; this is the frame loop pattern every real engine uses_
+- [ ] Move `child1` to `[100, 50, 0]` and confirm it renders at a different position than the root — _validates that local position is being correctly transformed into world space_
+- [ ] (Stretch) Set up a minimal WebGL context and pass `node.worldMatrix.elements` as `uniform mat4 uModel` — _the world matrix is exactly what the GPU expects as the model matrix in the MVP transform_
 
 **Concepts**
 
@@ -176,11 +176,11 @@ Reference article: <https://learnopengl.com/Guest-Articles/2021/Scene/Scene-Grap
 
 **Todos**
 
-- [ ] Add `visible: boolean = true` to `Node`; skip node and subtree in the render traversal when `false`
-- [ ] Add a `CameraNode` subclass whose view matrix = inverse of its world matrix
-- [ ] Sketch a `Component` interface and attach a `MeshComponent` to a node instead of hardcoding rendering in the node
-- [ ] Add an axis-aligned bounding box to each node that updates when `worldMatrix` changes
-- [ ] Try instancing: share one mesh but render it at multiple world positions from different nodes
+- [ ] Add `visible: boolean = true` to `Node`; skip node and subtree in the render traversal when `false` — _skipping the subtree (not just the node) is important: hidden parent = hidden children_
+- [ ] Add a `CameraNode` subclass whose view matrix = inverse of its world matrix — _the camera is just another node in the tree; inverting its world matrix transforms everything else into camera space_
+- [ ] Sketch a `Component` interface and attach a `MeshComponent` to a node instead of hardcoding rendering in the node — _this is how Unity/Godot work: nodes are just transform containers, components add behaviour_
+- [ ] Add an axis-aligned bounding box to each node that updates when `worldMatrix` changes — _AABBs in world space enable frustum culling: skip nodes the camera can't see_
+- [ ] Try instancing: share one mesh but render it at multiple world positions from different nodes — _the world matrix is the only thing that differs per instance; the GPU draws them all in one draw call_
 
 **Concepts**
 

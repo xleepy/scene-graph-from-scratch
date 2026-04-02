@@ -28,8 +28,32 @@ export class Matrix4 {
     return new Matrix4(result as Matrix4Type);
   }
 
-  public makeTranslation(x: number, y: number, z: number): Matrix4 {
+  public static makeTranslation(x: number, y: number, z: number): Matrix4 {
     return new Matrix4([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, x, y, z, 1]);
+  }
+
+  public static makeScale(sx: number, sy: number, sz: number): Matrix4 {
+    return new Matrix4([sx, 0, 0, 0, 0, sy, 0, 0, 0, 0, sz, 0, 0, 0, 0, 1]);
+  }
+
+  // Rotation around the x-axis by the given angle in radians.
+  public static rotationX(angle: number): Matrix4 {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Matrix4([1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1]);
+  }
+
+  // Rotation around the y-axis by the given angle in radians.
+  public static rotationY(angle: number): Matrix4 {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Matrix4([c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1]);
+  }
+
+  public static rotationZ(angle: number): Matrix4 {
+    const c = Math.cos(angle);
+    const s = Math.sin(angle);
+    return new Matrix4([c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
   }
 
   public toString(): string {
