@@ -13,11 +13,16 @@ export class Node {
 
   constructor(public readonly name: string) {}
 
+  // Attaches a child to this node so its transform is relative to this node's transform.
+  // Also sets the child's parent pointer so it can walk up the tree during updateWorldMatrix.
   public add(child: Node): void {
     this.children.push(child);
     child.setParent(this);
   }
 
+  // Marks this node and all its descendants stale.
+  // Children must be marked too because their world matrix depends on this node's world matrix —
+  // if this node moves, every child's world position changes even if their local position didn't.
   private makeDirty(): void {
     if (!this.dirty) {
       this.dirty = true;
@@ -45,6 +50,8 @@ export class Node {
     this.makeDirty();
   }
 
+  // Setters intercept assignment so the dirty flag is never accidentally skipped.
+  // Without setters, any direct assignment to _position would silently skip makeDirty().
   public get position(): Vector3 {
     return this._position;
   }
@@ -72,10 +79,16 @@ export class Node {
     this.makeDirty();
   }
 
+  // Called by add() — kept separate so the parent link is set without triggering
+  // the children array logic that belongs to the parent's add().
   setParent(parent: Node): void {
     this.parent = parent;
   }
 
+  // Recomputes world matrices for this node and all descendants in top-down order.
+  // Top-down is required: a child's world matrix = parent.worldMatrix × localMatrix,
+  // so the parent must be up to date before the child can be computed.
+  // Skips the local matrix recompute when dirty is false to avoid redundant TRS multiplications.
   updateWorldMatrix(): void {
     if (this.dirty) {
       const translation = Matrix4.makeTranslation(...this.position);
